@@ -6,11 +6,11 @@ import torch
 from torch.cuda import amp
 from flwr.common import NDArrays, Scalar
 from hydra.utils import instantiate
-from model import nanoGPT
-from engine import train, test
 from torch.utils.data import DataLoader
 
-from utils import get_scheduler
+from fedGPT.model import nanoGPT
+from fedGPT.engine import train, test
+from fedGPT.utils import get_scheduler
 
 
 class GptClient(fl.client.NumPyClient):

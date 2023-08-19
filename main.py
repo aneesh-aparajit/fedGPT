@@ -8,7 +8,7 @@ from fedGPT.client import get_client_fn
 from fedGPT.server import get_evaluate_fn, get_on_fit_config
 
 
-@hydra.main(config_path="./conf/", config_name="nase", version_base=None)
+@hydra.main(config_path="./conf/", config_name="base", version_base=None)
 def main(cfg: DictConfig):
     print('Config:')
     print('-------\n')

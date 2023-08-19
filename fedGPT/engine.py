@@ -1,8 +1,9 @@
 import torch
-from model import nanoGPT
 from torch.cuda import amp
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+
+from fedGPT.model import nanoGPT
 
 
 # ----------------------------- Training Function ---------------------------- #
