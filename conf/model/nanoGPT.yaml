@@ -1,2 +1,7 @@
 ---
-_target_: model.nanoGPT
+_target_: fedGPT.model.nanoGPT
+vocab_size: 50304
+n_embed: 768
+n_heads: 8
+buffer_size: 512
+n_blocks: 4

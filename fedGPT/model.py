@@ -13,7 +13,7 @@ class GPTConfig:
     vocab_size: int = 50304  # GPT2 has a total of 50257, padded to nearest multiple of 64 for efficiency
     n_layers: int = 6
     n_head: int = 8
-    n_embed: 768
+    n_embed: int = 768
     dropout: float = 0.1
     bias: bool = False
     use_sinusoidal: bool = True
@@ -93,11 +93,13 @@ class PositionalEncoding(nn.Module):
     def __init__(self, n_embed: int, max_seq_len: int) -> None:
         super().__init__()
 
-        position_id = torch.arange(0, max_seq_len)
+        position_id = torch.arange(0, max_seq_len).unsqueeze(1)
         frequencies = torch.arange(0, n_embed, 2, dtype=torch.float32) / n_embed
         frequencies = torch.pow(10000.0, -frequencies)
 
         positional_encodings = torch.zeros(size=(max_seq_len, n_embed))
+        # print(frequencies.shape, position_id.shape, positional_encodings.shape)
+
         positional_encodings[:, 0::2] = torch.sin(position_id * frequencies)
         positional_encodings[:, 1::2] = torch.cos(position_id * frequencies)
 
@@ -186,3 +188,15 @@ class nanoGPT(nn.Module):
             if idx_next == 0:
                 break
         return ids
+
+
+if __name__ == "__main__":
+    model = nanoGPT(
+        vocab_size=GPTConfig.vocab_size,
+        n_embed=GPTConfig.n_embed,
+        n_heads=GPTConfig.n_head,
+        buffer_size=GPTConfig.buffer_size,
+        n_blocks=GPTConfig.n_layers,
+    )
+
+    print(model)

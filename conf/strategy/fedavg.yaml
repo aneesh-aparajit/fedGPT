@@ -6,5 +6,8 @@ fraction_evaluate: 0.01
 min_evaluate_clients: ${num_clients_per_round_eval}
 min_available_clients: ${num_clients}
 on_fit_config_fn:
-  _target_: server.get_on_fit_config
+  _target_: fedGPT.server.get_on_fit_config
   config: ${config_fit}
+evaluate_fn:
+  _partial_: fedGPT.server,get_evaluate_fn
+  config: ${model}

@@ -1,2 +1,2 @@
-def get_scheduler(optimizer):
+def get_scheduler(optimizer, cfg):
     return
