@@ -21,6 +21,12 @@ class GPTConfig:
 
 # ----------------------------- Attention Module ----------------------------- #
 class Attention(nn.Module):
+    '''Unlike RNNs where we were required to get one output and then pass it back onto the RNN and repeat the process
+    again and again, here with masked attention, we simply find the lower triangular matrix and then weight them according 
+    the vector product the lower triangular matrix and the embedding vectors, we  build a masked representation for each word only using 
+    the values which occured/was predicted prior to the current index. 
+        - This is achieved by the torch.tril function and masking all zeros to -torch.inf (taking softmax makes it equal to zero)
+    '''
     def __init__(self, n_embed: int, head_size: int) -> None:
         super().__init__()
         self.Q = nn.Linear(n_embed, head_size, bias=GPTConfig.bias)
@@ -57,8 +63,8 @@ class MultiHeadAttention(nn.Module):
         self.dropout = nn.Dropout(p=GPTConfig.dropout)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = torch.cat([h(x) for h in self.heads], dim=-1)
-        return self.dropout(self.proj(x))
+        x = torch.cat([h(x) for h in self.heads], dim=-1) # (B, T, C) -> (B, T, C//N_HEADS) -> (B, T, C)
+        return self.dropout(self.proj(x)) #  (B, T, C) -> (B, T, C)
 
 
 # ------------------------------- Feed Forward ------------------------------- #
@@ -83,7 +89,7 @@ class AttentionBlock(nn.Module):
         self.ln2 = nn.LayerNorm((n_embed,))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = x + self.sa(self.ln1(x))
+        x = x + self.sa(self.ln1(x)) # (B, T, C) -> (B, T, C)
         x = x + self.ffwd(self.ln2(x))
         return x
 
@@ -112,8 +118,8 @@ class PositionalEncoding(nn.Module):
         return self.dropout(pos_encodings + x)
 
 
-# ------------------------------ Nano GPT Module ----------------------------- #
-class nanoGPT(nn.Module):
+# ------------------------------ NanoGPT Module ------------------------------ #
+class NanoGPT(nn.Module):
     def __init__(
         self,
         vocab_size: int,
@@ -154,13 +160,13 @@ class nanoGPT(nn.Module):
         self, input_ids: torch.Tensor, labels: torch.Tensor = None
     ) -> torch.Tensor:
         B, T = input_ids.shape
-        tok_emb = self.token_embeddings(input_ids)
+        tok_emb = self.token_embeddings(input_ids) # (B, T, C)
         if GPTConfig.use_sinusoidal:
-            x = self.positional_encodings.forward(tok_emb)
+            x = self.positional_encodings.forward(tok_emb) # (B, T, C) -> (B, T, C)
         else:
             x = tok_emb + self.positional_encodings(
                 torch.arange(T, dtype=torch.long, device=input_ids.shape)
-            )
+            ) # (B, T, C) -> (B, T, C)
         x = self.blocks(x)
         x = self.ln(x)
         x = self.lm_head(x)
@@ -191,7 +197,7 @@ class nanoGPT(nn.Module):
 
 
 if __name__ == "__main__":
-    model = nanoGPT(
+    model = NanoGPT(
         vocab_size=GPTConfig.vocab_size,
         n_embed=GPTConfig.n_embed,
         n_heads=GPTConfig.n_head,
