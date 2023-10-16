@@ -8,7 +8,7 @@ from flwr.common import NDArrays, Scalar
 from hydra.utils import instantiate
 from torch.utils.data import DataLoader
 
-from fedGPT.model import nanoGPT
+from fedGPT.model import NanoGPT
 from fedGPT.engine import train, test
 from fedGPT.utils import get_scheduler
 
