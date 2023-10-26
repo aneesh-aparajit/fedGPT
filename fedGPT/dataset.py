@@ -61,3 +61,29 @@ def collate_fn(batch):
                 k: torch.cat([res[k], tmp[k]], dim=0) for k,v in res.items()
             }
     return res
+
+
+def load_datasets(num_clients: int):
+    trainset = NanoGptDataset(texts=[])
+    testset = NanoGptDataset(texts=[])
+
+    # Split training set into `num_clients` partitions to simulate different local datasets
+    partition_size = len(trainset) // num_clients
+    lengths = [partition_size] * num_clients
+    datasets = random_split(
+        trainset, lengths=lengths, generator=torch.Generator().manual_seed(42))
+    
+    # Split each partition into train/val and create DataLoader
+    trainloaders = []
+    validloaders = []
+    for ds in datasets:
+        len_val = len(ds) // 10
+        len_train = len(ds) - len_val
+        lengths = [len_train, len_val]
+        ds_train, ds_val = random_split(
+            ds_train, lengths=lengths, generator=torch.Generator().manual_seed(42)
+        )
+        trainloaders.append(DataLoader(ds_train, batch_size=32, shuffle=True))
+        validloaders.append(DataLoader(ds_val, batch_size=32))
+    testloader = DataLoader(testloader, batch_size=32)
+    return trainloaders, validloaders, testloader
